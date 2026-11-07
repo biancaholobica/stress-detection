@@ -1,9 +1,8 @@
-"""Teste care verifică exact ce contează pentru corectitudine: ferestre curate și lipsa scurgerii de date."""
 import numpy as np
 import pytest
 
 from make_synthetic import make_subject
-from wesad_stress.data import KEEP, label_segments
+from data import KEEP, label_segments
 from wesad_stress.features import extract_windows
 from wesad_stress.protocols import split_p1, split_p2, split_p3
 
