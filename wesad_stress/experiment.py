@@ -19,6 +19,7 @@ SENSOR_SETS = {
 META = {"subject", "seg", "seg_start", "seg_end", "t0", "t1", "y"}
 
 
+# Filtrează tabelul mare și alege doar coloanele care corespund senzorilor pe care ai cerut să îi folosești
 def feature_columns(df, sensors):
     prefixes = tuple(s + "_" for s in sensors)
     return [c for c in df.columns if c not in META and c.startswith(prefixes)]
@@ -28,13 +29,13 @@ def make_model(name, seed=0):
     if name == "logreg":
         clf = LogisticRegression(class_weight="balanced", max_iter=2000)
     elif name == "rf":
-        clf = RandomForestClassifier(n_estimators=200, class_weight="balanced",
+        clf = RandomForestClassifier(n_estimators=200, class_weight="balanced", # trateaza ambele clase cu importanta reala
                                      random_state=seed, n_jobs=-1)
     elif name == "svm":
         clf = SVC(kernel="rbf", class_weight="balanced")
-    elif name == "majority":  # linie de bază: mereu clasa cea mai frecventă
+    elif name == "majority":  # baseline: mereu clasa cea mai frecventă
         clf = DummyClassifier(strategy="most_frequent")
-    elif name == "rf_shuffled":  # linie de bază: etichete de antrenare amestecate
+    elif name == "rf_shuffled":  # baseline: etichete de antrenare amestecate
         clf = RandomForestClassifier(n_estimators=200, class_weight="balanced",
                                      random_state=seed, n_jobs=-1)
     else:

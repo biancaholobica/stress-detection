@@ -2,6 +2,9 @@ import numpy as np
 from sklearn.model_selection import train_test_split
 
 
+# P1 - Random Split
+# Ia toate rândurile din tabel, le amestecă la întâmplare și le 
+# împarte în două grupuri: 75% pentru antrenament (tr) și 25% pentru testare (te).
 def split_p1(df, seed, test_size=0.25):
     idx = np.arange(len(df))
     tr, te = train_test_split(idx, test_size=test_size, stratify=df["y"].values,
@@ -9,6 +12,9 @@ def split_p1(df, seed, test_size=0.25):
     return [(tr, te)]
 
 
+# P2 - Temporal Split
+# Antrenare pe prima parte și testare pe a doua parte a fiecărei etape 
+# experimentale, cu un interval de timp între ele
 def split_p2(df, win_s, test_frac=0.25):
     tr_pos, te_pos = [], []
     for _, g in df.groupby(["subject", "seg"]):
@@ -19,6 +25,8 @@ def split_p2(df, win_s, test_frac=0.25):
     return [(np.array(tr_pos), np.array(te_pos))]
 
 
+# P3 - LOSO
+# Antrenare pe 14 subiecți, testare pe al 15-lea subiect
 def split_p3(df):
     subj = df["subject"].values
     folds = []

@@ -7,12 +7,13 @@ FS = {"BVP": 64, "EDA": 4, "TEMP": 4, "ACC": 32}
 FS_LABEL = 700
 KEEP = {1: 0, 3: 0, 2: 1}
 
-
+#cauta in folderul de date subfoldere S<numar> care contin fisierul S<numar>.pk1 si le sorteaza dupa numar
 def list_subjects(root):
     found = [p.name for p in Path(root).glob("S*") if (p / f"{p.name}.pkl").exists()]
     return sorted(found, key=lambda s: int(s[1:]))
 
 
+# deschide pickle ul unui subiect si returneaza un dictionar cu BVP, EDA, TEMP, ACC si etichetele
 def load_subject(root, subject):
     path = Path(root) / subject / f"{subject}.pkl"
     with open(path, "rb") as f:
@@ -33,6 +34,7 @@ def check_rates(raw):
     return out
 
 
+# separa etichetele in segmente de aceeasi stare 
 def label_segments(label):
     label = np.asarray(label)
     change = np.flatnonzero(np.diff(label)) + 1

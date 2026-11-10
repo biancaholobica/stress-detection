@@ -5,16 +5,19 @@ from scipy.signal import butter, sosfiltfilt, find_peaks
 from .data import FS, KEEP, label_segments
 
 
+# pastreaza doar frecventele utile( de ex bataile inimii) folosit pentru puls
+# elimina zgomotul lent si cel rapid
 def _bandpass(x, fs, lo, hi, order=3):
     sos = butter(order, [lo, hi], btype="band", fs=fs, output="sos")
     return sosfiltfilt(sos, x)
 
-
+# lasa sa treaca doar variatiile lente - folosit pentru EDA
 def _lowpass(x, fs, cutoff, order=2):
     sos = butter(order, cutoff, btype="low", fs=fs, output="sos")
     return sosfiltfilt(sos, x)
 
-
+# ia datele brute de la toti senzorii si le pregateste o singura data pentru toata inregistrarea
+# EDA_PH - vârfurile rapide de transpirație care apar instant când omul are o emoție sau un stres.
 def prepare_signals(raw):
     eda = raw["EDA"].astype(float)
     tonic = _lowpass(eda, FS["EDA"], 0.05)
@@ -27,6 +30,9 @@ def prepare_signals(raw):
     }
 
 
+# pentru o fereastra de timp dintr un senzor calculeaza:
+# media(mean), abaterea standard(std), min, max
+# panta 
 def _slope(x, fs):
     t = np.arange(len(x)) / fs
     t = t - t.mean()
@@ -41,6 +47,9 @@ def _stats(x, fs, name, with_slope=True):
     return out
 
 
+# functie speciala pentru inima
+# calculeaza: BVP hr(ritmul cardiac mediu), BVP_sdnn(cat de neregulate sunt intervalele dintre batai), 
+# BVP_rmssd(scade puternic atunci când omul este stresat)
 def _bvp_features(bvp):
     fs = FS["BVP"]
     nan = {"BVP_hr": np.nan, "BVP_sdnn": np.nan, "BVP_rmssd": np.nan}
@@ -55,6 +64,8 @@ def _bvp_features(bvp):
             "BVP_rmssd": float(np.sqrt(np.mean(np.diff(ibi) ** 2)))}
 
 
+# ia o parte mică de timp (de la secunda t0 la t1, de exemplu o fereastră de 10 secunde) și calculează
+# toate statisticiile, numără vârfurile de transpirație (EDA_n_peaks) și calculează pulsul pentru acea bucățică.
 def window_features(sig, t0, t1):
     def cut(name):
         fs = FS[name if name in FS else "EDA"]
@@ -78,6 +89,9 @@ def window_features(sig, t0, t1):
     return feats
 
 
+# folosește segmentele curate găsite la label segments (ca să nu treacă niciodată granița dintre starea de stres și cea de
+# relaxare) și plimbă fereastra pas cu pas pe tot parcursul experimentului (folosind un overlap / suprapunere, de ex. 25%).
+# suprapunerea are loc doar in interiorul aceleiasi stari!
 def extract_windows(raw, subject, win_s, overlap):
     sig = prepare_signals(raw)
     step = win_s * (1.0 - overlap)

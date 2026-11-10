@@ -3,6 +3,8 @@
   python run_experiment.py --data-root data/WESAD --quick
   python run_experiment.py --data-root data/WESAD --windows 5 10 30 60 120 --overlaps 0 0.5
   python run_experiment.py --data-root data/synthetic --quick     (test fără date reale)
+  python run_experiment.py --data-root data/WESAD --check-rates
+  python run_experiment.py --data-root data/WESAD --quick --controls --out results/controls/results.csv
 """
 import argparse
 import time
